@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -160,6 +161,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -170,33 +172,38 @@
         <section>
             <h2>About</h2>
             <p>
-                Welcome! This is a personal space for hosting tools, notes, and various web experiments. 
-                Built with pure HTML — no frameworks, no build steps, just simplicity.
+                A collection of portable, browser-based tools. Each tool is self-contained in a single HTML file
+                — no server or installation required. Powered by <a href="https://pyodide.org/">Pyodide</a> for Python
+                support.
             </p>
         </section>
 
         <section>
-            <h2>Projects <span class="badge">3</span></h2>
+            <h2>Tools <span class="badge">4</span></h2>
             <div class="card-grid">
-                <div class="card">
-                    <h3>🔧 Network Tools</h3>
-                    <p>Tools for DNS lookup, port scanning, and connectivity tests.</p>
-                </div>
-                <div class="card">
-                    <h3>📝 Cheatsheets</h3>
-                    <p>Quick reference guides for Caddy, OpenWrt, and Tailscale.</p>
-                </div>
-                <div class="card">
-                    <h3>🧪 Experiments</h3>
-                    <p>Random web experiments and proof-of-concepts.</p>
-                </div>
+                <a href="./markdown/" class="card">
+                    <h3>📝 Markdown Previewer</h3>
+                    <p>Write Markdown and see live rendered preview side-by-side.</p>
+                </a>
+                <a href="./regex/" class="card">
+                    <h3>🔍 Regex Tester</h3>
+                    <p>Test regular expressions with live matching and group highlighting.</p>
+                </a>
+                <a href="./cron/" class="card">
+                    <h3>⏰ Cron Helper</h3>
+                    <p>Build, validate, and explain cron expressions with next run times.</p>
+                </a>
+                <a href="./stats/" class="card">
+                    <h3>📊 Statistics Calculator</h3>
+                    <p>Calculate mean, median, std dev and more using Python (Pyodide).</p>
+                </a>
             </div>
         </section>
 
         <section>
             <h2>Links</h2>
             <p>
-                <a href="https://github.com/ycmm52">GitHub</a> · 
+                <a href="https://github.com/ycmm52">GitHub</a> ·
                 <a href="https://github.com/ycmm52/tools">This Repository</a>
             </p>
         </section>
@@ -206,4 +213,5 @@
         </footer>
     </div>
 </body>
+
 </html>

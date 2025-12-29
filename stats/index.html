@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Calculator | Tools</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        :root {
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext0: #a6adc8;
+            --ctp-subtext1: #bac2de;
+            --ctp-surface0: #313244;
+            --ctp-surface1: #45475a;
+            --ctp-surface2: #585b70;
+            --ctp-overlay0: #6c7086;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-sapphire: #74c7ec;
+            --ctp-sky: #89dceb;
+            --ctp-teal: #94e2d5;
+            --ctp-green: #a6e3a1;
+            --ctp-yellow: #f9e2af;
+            --ctp-peach: #fab387;
+            --ctp-mauve: #cba6f7;
+            --ctp-pink: #f5c2e7;
+            --ctp-red: #f38ba8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--ctp-base);
+            color: var(--ctp-text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--ctp-mantle);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--ctp-surface0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            color: var(--ctp-mauve);
+        }
+
+        .back-link {
+            color: var(--ctp-subtext0);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--ctp-sapphire);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 17, 27, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--ctp-surface1);
+            border-top-color: var(--ctp-mauve);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--ctp-subtext0);
+            font-size: 0.9rem;
+        }
+
+        .pyodide-badge {
+            margin-top: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            background: var(--ctp-surface0);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--ctp-yellow);
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ctp-subtext0);
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            background: var(--ctp-surface0);
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--ctp-text);
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--ctp-mauve);
+        }
+
+        .hint {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--ctp-overlay0);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--ctp-mauve), var(--ctp-pink));
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            color: var(--ctp-crust);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(203, 166, 247, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error {
+            color: var(--ctp-red);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--ctp-mantle);
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--ctp-surface1);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--ctp-lavender);
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            word-break: break-all;
+        }
+
+        .stat-label {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--ctp-subtext0);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card.highlight .stat-value {
+            color: var(--ctp-green);
+        }
+
+        .stat-card.secondary .stat-value {
+            color: var(--ctp-peach);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading Python runtime...</div>
+        <div class="pyodide-badge">🐍 Powered by Pyodide</div>
+    </div>
+
+    <header>
+        <h1>📊 Statistics Calculator</h1>
+        <a href="../" class="back-link">← Back to Tools</a>
+    </header>
+
+    <div class="container">
+        <div class="input-section">
+            <label>Enter Numbers</label>
+            <textarea id="dataInput"
+                placeholder="Enter numbers separated by commas, spaces, or newlines...">12, 15, 18, 22, 25, 28, 30, 33, 35, 40, 42, 45, 48, 50, 55</textarea>
+            <div class="hint">Accepts comma-separated, space-separated, or one number per line</div>
+            <button id="calculateBtn" disabled>Calculate Statistics</button>
+            <div id="error" class="error"></div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="stat-card highlight">
+                <div class="stat-value" id="mean">—</div>
+                <div class="stat-label">Mean</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-value" id="median">—</div>
+                <div class="stat-label">Median</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="mode">—</div>
+                <div class="stat-label">Mode</div>
+            </div>
+            <div class="stat-card secondary">
+                <div class="stat-value" id="stdev">—</div>
+                <div class="stat-label">Std Deviation</div>
+            </div>
+            <div class="stat-card secondary">
+                <div class="stat-value" id="variance">—</div>
+                <div class="stat-label">Variance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="min">—</div>
+                <div class="stat-label">Minimum</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="max">—</div>
+                <div class="stat-label">Maximum</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="range">—</div>
+                <div class="stat-label">Range</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="sum">—</div>
+                <div class="stat-label">Sum</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="count">—</div>
+                <div class="stat-label">Count</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pyodide = null;
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const dataInput = document.getElementById('dataInput');
+        const errorEl = document.getElementById('error');
+
+        async function initPyodide() {
+            try {
+                pyodide = await loadPyodide();
+                loadingOverlay.classList.add('hidden');
+                calculateBtn.disabled = false;
+
+                // Calculate on load with default data
+                calculate();
+            } catch (e) {
+                loadingOverlay.innerHTML = `
+                    <div style="color: var(--ctp-red); text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+                        <div>Failed to load Python runtime</div>
+                        <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--ctp-subtext0);">${e.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function formatNumber(num) {
+            if (Number.isInteger(num)) return num.toString();
+            return num.toFixed(4).replace(/\.?0+$/, '');
+        }
+
+        async function calculate() {
+            errorEl.textContent = '';
+
+            const rawInput = dataInput.value.trim();
+            if (!rawInput) {
+                errorEl.textContent = 'Please enter some numbers';
+                return;
+            }
+
+            // Parse input to array
+            const numbers = rawInput
+                .split(/[\s,\n]+/)
+                .map(s => s.trim())
+                .filter(s => s !== '')
+                .map(Number)
+                .filter(n => !isNaN(n));
+
+            if (numbers.length === 0) {
+                errorEl.textContent = 'No valid numbers found';
+                return;
+            }
+
+            if (numbers.length === 1) {
+                errorEl.textContent = 'Please enter at least 2 numbers for statistics';
+                return;
+            }
+
+            try {
+                const result = await pyodide.runPythonAsync(`
+import statistics
+import json
+
+data = ${JSON.stringify(numbers)}
+
+try:
+    mode_val = statistics.mode(data)
+except statistics.StatisticsError:
+    mode_val = "N/A"
+
+result = {
+    "mean": statistics.mean(data),
+    "median": statistics.median(data),
+    "mode": mode_val,
+    "stdev": statistics.stdev(data),
+    "variance": statistics.variance(data),
+    "min": min(data),
+    "max": max(data),
+    "range": max(data) - min(data),
+    "sum": sum(data),
+    "count": len(data)
+}
+
+json.dumps(result)
+                `);
+
+                const stats = JSON.parse(result);
+
+                document.getElementById('mean').textContent = formatNumber(stats.mean);
+                document.getElementById('median').textContent = formatNumber(stats.median);
+                document.getElementById('mode').textContent = stats.mode === "N/A" ? "N/A" : formatNumber(stats.mode);
+                document.getElementById('stdev').textContent = formatNumber(stats.stdev);
+                document.getElementById('variance').textContent = formatNumber(stats.variance);
+                document.getElementById('min').textContent = formatNumber(stats.min);
+                document.getElementById('max').textContent = formatNumber(stats.max);
+                document.getElementById('range').textContent = formatNumber(stats.range);
+                document.getElementById('sum').textContent = formatNumber(stats.sum);
+                document.getElementById('count').textContent = stats.count;
+
+            } catch (e) {
+                errorEl.textContent = 'Calculation error: ' + e.message;
+            }
+        }
+
+        calculateBtn.addEventListener('click', calculate);
+
+        // Also calculate on Enter key
+        dataInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                calculate();
+            }
+        });
+
+        // Initialize Pyodide
+        initPyodide();
+    </script>
+</body>
+
+</html>

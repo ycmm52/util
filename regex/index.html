@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Tester | Tools</title>
+    <style>
+        :root {
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext0: #a6adc8;
+            --ctp-subtext1: #bac2de;
+            --ctp-surface0: #313244;
+            --ctp-surface1: #45475a;
+            --ctp-surface2: #585b70;
+            --ctp-overlay0: #6c7086;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-sapphire: #74c7ec;
+            --ctp-sky: #89dceb;
+            --ctp-teal: #94e2d5;
+            --ctp-green: #a6e3a1;
+            --ctp-yellow: #f9e2af;
+            --ctp-peach: #fab387;
+            --ctp-mauve: #cba6f7;
+            --ctp-pink: #f5c2e7;
+            --ctp-red: #f38ba8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--ctp-base);
+            color: var(--ctp-text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--ctp-mantle);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--ctp-surface0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            color: var(--ctp-mauve);
+        }
+
+        .back-link {
+            color: var(--ctp-subtext0);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--ctp-sapphire);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ctp-subtext0);
+            margin-bottom: 0.5rem;
+        }
+
+        .regex-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .regex-input span {
+            color: var(--ctp-overlay0);
+            font-size: 1.25rem;
+        }
+
+        input[type="text"],
+        textarea {
+            flex: 1;
+            background: var(--ctp-surface0);
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--ctp-text);
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: var(--ctp-mauve);
+        }
+
+        .flags {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .flag {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            cursor: pointer;
+        }
+
+        .flag input {
+            accent-color: var(--ctp-mauve);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .result-box {
+            background: var(--ctp-mantle);
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 80px;
+            line-height: 1.8;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .match {
+            background: var(--ctp-green);
+            color: var(--ctp-crust);
+            padding: 0.1rem 0.25rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .error {
+            color: var(--ctp-red);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--ctp-surface0);
+            border-radius: 8px;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--ctp-lavender);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--ctp-subtext0);
+            text-transform: uppercase;
+        }
+
+        .groups {
+            margin-top: 1.5rem;
+        }
+
+        .groups h3 {
+            font-size: 0.9rem;
+            color: var(--ctp-lavender);
+            margin-bottom: 0.75rem;
+        }
+
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .group-item {
+            background: var(--ctp-surface0);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.85rem;
+        }
+
+        .group-index {
+            color: var(--ctp-peach);
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🔍 Regex Tester</h1>
+        <a href="../" class="back-link">← Back to Tools</a>
+    </header>
+
+    <div class="container">
+        <div class="input-group">
+            <label>Regular Expression</label>
+            <div class="regex-input">
+                <span>/</span>
+                <input type="text" id="pattern" placeholder="Enter regex pattern" value="\b\w+@\w+\.\w+\b">
+                <span>/</span>
+                <input type="text" id="flagsInput" placeholder="flags" value="g" style="width: 60px;">
+            </div>
+            <div class="flags">
+                <label class="flag"><input type="checkbox" id="flag-g" checked> <span>global (g)</span></label>
+                <label class="flag"><input type="checkbox" id="flag-i"> <span>case-insensitive (i)</span></label>
+                <label class="flag"><input type="checkbox" id="flag-m"> <span>multiline (m)</span></label>
+                <label class="flag"><input type="checkbox" id="flag-s"> <span>dotAll (s)</span></label>
+            </div>
+            <div id="error" class="error"></div>
+        </div>
+
+        <div class="input-group">
+            <label>Test String</label>
+            <textarea id="testString" placeholder="Enter text to match against...">Contact us at support@example.com or sales@company.org for more information.
+
+You can also reach jane.doe@business.net directly.</textarea>
+        </div>
+
+        <div class="input-group">
+            <label>Matches</label>
+            <div id="result" class="result-box"></div>
+            <div class="stats">
+                <div class="stat">
+                    <span id="matchCount" class="stat-value">0</span>
+                    <span class="stat-label">Matches</span>
+                </div>
+                <div class="stat">
+                    <span id="groupCount" class="stat-value">0</span>
+                    <span class="stat-label">Groups</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="groupsContainer" class="groups" style="display: none;">
+            <h3>Captured Groups</h3>
+            <div id="groupList" class="group-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const patternInput = document.getElementById('pattern');
+        const flagsInput = document.getElementById('flagsInput');
+        const testStringInput = document.getElementById('testString');
+        const resultBox = document.getElementById('result');
+        const errorBox = document.getElementById('error');
+        const matchCountEl = document.getElementById('matchCount');
+        const groupCountEl = document.getElementById('groupCount');
+        const groupsContainer = document.getElementById('groupsContainer');
+        const groupList = document.getElementById('groupList');
+
+        const flagCheckboxes = {
+            g: document.getElementById('flag-g'),
+            i: document.getElementById('flag-i'),
+            m: document.getElementById('flag-m'),
+            s: document.getElementById('flag-s')
+        };
+
+        function updateFlags() {
+            let flags = '';
+            for (const [flag, checkbox] of Object.entries(flagCheckboxes)) {
+                if (checkbox.checked) flags += flag;
+            }
+            flagsInput.value = flags;
+            testRegex();
+        }
+
+        function syncCheckboxes() {
+            const flags = flagsInput.value;
+            for (const [flag, checkbox] of Object.entries(flagCheckboxes)) {
+                checkbox.checked = flags.includes(flag);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function testRegex() {
+            const pattern = patternInput.value;
+            const flags = flagsInput.value;
+            const testString = testStringInput.value;
+
+            errorBox.textContent = '';
+            groupsContainer.style.display = 'none';
+            groupList.innerHTML = '';
+
+            if (!pattern) {
+                resultBox.innerHTML = escapeHtml(testString);
+                matchCountEl.textContent = '0';
+                groupCountEl.textContent = '0';
+                return;
+            }
+
+            try {
+                const regex = new RegExp(pattern, flags);
+                const matches = [...testString.matchAll(new RegExp(pattern, flags.includes('g') ? flags : flags + 'g'))];
+
+                matchCountEl.textContent = matches.length;
+
+                if (matches.length === 0) {
+                    resultBox.innerHTML = escapeHtml(testString);
+                    groupCountEl.textContent = '0';
+                    return;
+                }
+
+                // Highlight matches
+                let result = '';
+                let lastIndex = 0;
+
+                for (const match of matches) {
+                    result += escapeHtml(testString.slice(lastIndex, match.index));
+                    result += `<span class="match">${escapeHtml(match[0])}</span>`;
+                    lastIndex = match.index + match[0].length;
+                }
+                result += escapeHtml(testString.slice(lastIndex));
+                resultBox.innerHTML = result;
+
+                // Show groups
+                const allGroups = [];
+                matches.forEach((match, matchIndex) => {
+                    if (match.length > 1) {
+                        for (let i = 1; i < match.length; i++) {
+                            allGroups.push({ matchIndex, groupIndex: i, value: match[i] });
+                        }
+                    }
+                });
+
+                groupCountEl.textContent = allGroups.length;
+
+                if (allGroups.length > 0) {
+                    groupsContainer.style.display = 'block';
+                    allGroups.forEach(({ matchIndex, groupIndex, value }) => {
+                        const div = document.createElement('div');
+                        div.className = 'group-item';
+                        div.innerHTML = `<span class="group-index">Match ${matchIndex + 1}, Group ${groupIndex}:</span> ${escapeHtml(value || '(empty)')}`;
+                        groupList.appendChild(div);
+                    });
+                }
+
+            } catch (e) {
+                errorBox.textContent = e.message;
+                resultBox.innerHTML = escapeHtml(testString);
+                matchCountEl.textContent = '0';
+                groupCountEl.textContent = '0';
+            }
+        }
+
+        patternInput.addEventListener('input', testRegex);
+        flagsInput.addEventListener('input', () => { syncCheckboxes(); testRegex(); });
+        testStringInput.addEventListener('input', testRegex);
+
+        for (const checkbox of Object.values(flagCheckboxes)) {
+            checkbox.addEventListener('change', updateFlags);
+        }
+
+        // Initial test
+        testRegex();
+    </script>
+</body>
+
+</html>

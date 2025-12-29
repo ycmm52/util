@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cron Expression Helper | Tools</title>
+    <script src="https://cdn.jsdelivr.net/npm/cronstrue@2.50.0/dist/cronstrue.min.js"></script>
+    <style>
+        :root {
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext0: #a6adc8;
+            --ctp-subtext1: #bac2de;
+            --ctp-surface0: #313244;
+            --ctp-surface1: #45475a;
+            --ctp-surface2: #585b70;
+            --ctp-overlay0: #6c7086;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-sapphire: #74c7ec;
+            --ctp-sky: #89dceb;
+            --ctp-teal: #94e2d5;
+            --ctp-green: #a6e3a1;
+            --ctp-yellow: #f9e2af;
+            --ctp-peach: #fab387;
+            --ctp-mauve: #cba6f7;
+            --ctp-pink: #f5c2e7;
+            --ctp-red: #f38ba8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--ctp-base);
+            color: var(--ctp-text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--ctp-mantle);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--ctp-surface0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            color: var(--ctp-mauve);
+        }
+
+        .back-link {
+            color: var(--ctp-subtext0);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--ctp-sapphire);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ctp-subtext0);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: var(--ctp-surface0);
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            color: var(--ctp-text);
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 1.25rem;
+            text-align: center;
+            letter-spacing: 0.1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--ctp-mauve);
+        }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .preset {
+            background: var(--ctp-surface0);
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            color: var(--ctp-subtext0);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset:hover {
+            background: var(--ctp-surface1);
+            color: var(--ctp-text);
+            border-color: var(--ctp-mauve);
+        }
+
+        .result-card {
+            background: var(--ctp-mantle);
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-card h2 {
+            font-size: 0.8rem;
+            color: var(--ctp-subtext0);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        #description {
+            font-size: 1.25rem;
+            color: var(--ctp-green);
+            line-height: 1.5;
+        }
+
+        #description.error {
+            color: var(--ctp-red);
+            font-size: 1rem;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .field {
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            background: var(--ctp-surface0);
+            border-radius: 8px;
+        }
+
+        .field-value {
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 1rem;
+            color: var(--ctp-lavender);
+            margin-bottom: 0.25rem;
+        }
+
+        .field-label {
+            font-size: 0.7rem;
+            color: var(--ctp-overlay0);
+            text-transform: uppercase;
+        }
+
+        #nextRuns {
+            list-style: none;
+        }
+
+        #nextRuns li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--ctp-surface0);
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        #nextRuns li:last-child {
+            border-bottom: none;
+        }
+
+        .run-index {
+            color: var(--ctp-overlay0);
+            font-size: 0.75rem;
+            min-width: 1.5rem;
+        }
+
+        .run-date {
+            color: var(--ctp-sapphire);
+        }
+
+        .run-time {
+            color: var(--ctp-peach);
+        }
+
+        .run-relative {
+            color: var(--ctp-subtext0);
+            margin-left: auto;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .fields {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>⏰ Cron Expression Helper</h1>
+        <a href="../" class="back-link">← Back to Tools</a>
+    </header>
+
+    <div class="container">
+        <div class="input-section">
+            <label>Cron Expression</label>
+            <input type="text" id="cronInput" value="0 9 * * 1-5" placeholder="* * * * *">
+            <div class="presets">
+                <button class="preset" data-cron="* * * * *">Every minute</button>
+                <button class="preset" data-cron="0 * * * *">Every hour</button>
+                <button class="preset" data-cron="0 0 * * *">Daily midnight</button>
+                <button class="preset" data-cron="0 9 * * 1-5">Weekdays 9am</button>
+                <button class="preset" data-cron="0 0 * * 0">Weekly Sunday</button>
+                <button class="preset" data-cron="0 0 1 * *">Monthly 1st</button>
+                <button class="preset" data-cron="0 0 1 1 *">Yearly Jan 1</button>
+            </div>
+        </div>
+
+        <div class="result-card">
+            <h2>Human-Readable</h2>
+            <div id="description">At 09:00, Monday through Friday</div>
+        </div>
+
+        <div class="result-card">
+            <h2>Fields Breakdown</h2>
+            <div class="fields" id="fields">
+                <div class="field">
+                    <div class="field-value">0</div>
+                    <div class="field-label">Minute</div>
+                </div>
+                <div class="field">
+                    <div class="field-value">9</div>
+                    <div class="field-label">Hour</div>
+                </div>
+                <div class="field">
+                    <div class="field-value">*</div>
+                    <div class="field-label">Day</div>
+                </div>
+                <div class="field">
+                    <div class="field-value">*</div>
+                    <div class="field-label">Month</div>
+                </div>
+                <div class="field">
+                    <div class="field-value">1-5</div>
+                    <div class="field-label">Weekday</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-card">
+            <h2>Next 5 Runs</h2>
+            <ul id="nextRuns"></ul>
+        </div>
+    </div>
+
+    <script>
+        const cronInput = document.getElementById('cronInput');
+        const descriptionEl = document.getElementById('description');
+        const fieldsEl = document.getElementById('fields');
+        const nextRunsEl = document.getElementById('nextRuns');
+        const presets = document.querySelectorAll('.preset');
+
+        const FIELD_NAMES = ['Minute', 'Hour', 'Day', 'Month', 'Weekday'];
+
+        function parseCron(expr) {
+            const parts = expr.trim().split(/\s+/);
+            if (parts.length < 5 || parts.length > 6) return null;
+
+            // Handle 6-part cron (with seconds) by dropping the first part
+            if (parts.length === 6) parts.shift();
+
+            return {
+                minute: parts[0],
+                hour: parts[1],
+                day: parts[2],
+                month: parts[3],
+                weekday: parts[4]
+            };
+        }
+
+        function getNextRuns(expr, count = 5) {
+            const parsed = parseCron(expr);
+            if (!parsed) return [];
+
+            const runs = [];
+            const now = new Date();
+            let current = new Date(now);
+            current.setSeconds(0);
+            current.setMilliseconds(0);
+
+            for (let i = 0; i < 10000 && runs.length < count; i++) {
+                current = new Date(current.getTime() + 60000);
+
+                if (matchesCron(current, parsed)) {
+                    runs.push(new Date(current));
+                }
+            }
+            return runs;
+        }
+
+        function matchesCron(date, cron) {
+            return matchField(date.getMinutes(), cron.minute, 0, 59) &&
+                matchField(date.getHours(), cron.hour, 0, 23) &&
+                matchField(date.getDate(), cron.day, 1, 31) &&
+                matchField(date.getMonth() + 1, cron.month, 1, 12) &&
+                matchField(date.getDay(), cron.weekday, 0, 6);
+        }
+
+        function matchField(value, field, min, max) {
+            if (field === '*') return true;
+
+            const parts = field.split(',');
+            for (const part of parts) {
+                if (part.includes('/')) {
+                    const [range, step] = part.split('/');
+                    const stepNum = parseInt(step);
+                    let start = min;
+                    let end = max;
+
+                    if (range !== '*') {
+                        if (range.includes('-')) {
+                            [start, end] = range.split('-').map(Number);
+                        } else {
+                            start = parseInt(range);
+                        }
+                    }
+
+                    for (let i = start; i <= end; i += stepNum) {
+                        if (value === i) return true;
+                    }
+                } else if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(Number);
+                    if (value >= start && value <= end) return true;
+                } else {
+                    if (value === parseInt(part)) return true;
+                }
+            }
+            return false;
+        }
+
+        function formatRelative(date) {
+            const now = new Date();
+            const diff = date - now;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `in ${days}d ${hours % 24}h`;
+            if (hours > 0) return `in ${hours}h ${minutes % 60}m`;
+            return `in ${minutes}m`;
+        }
+
+        function updateDisplay() {
+            const expr = cronInput.value.trim();
+
+            // Update description
+            try {
+                const description = cronstrue.toString(expr);
+                descriptionEl.textContent = description;
+                descriptionEl.classList.remove('error');
+            } catch (e) {
+                descriptionEl.textContent = e.message || 'Invalid cron expression';
+                descriptionEl.classList.add('error');
+            }
+
+            // Update fields
+            const parsed = parseCron(expr);
+            if (parsed) {
+                const values = [parsed.minute, parsed.hour, parsed.day, parsed.month, parsed.weekday];
+                fieldsEl.innerHTML = values.map((val, i) => `
+                    <div class="field">
+                        <div class="field-value">${val}</div>
+                        <div class="field-label">${FIELD_NAMES[i]}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Update next runs
+            const runs = getNextRuns(expr);
+            nextRunsEl.innerHTML = runs.map((run, i) => {
+                const dateStr = run.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const timeStr = run.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <li>
+                        <span class="run-index">${i + 1}.</span>
+                        <span class="run-date">${dateStr}</span>
+                        <span class="run-time">${timeStr}</span>
+                        <span class="run-relative">${formatRelative(run)}</span>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        cronInput.addEventListener('input', updateDisplay);
+
+        presets.forEach(btn => {
+            btn.addEventListener('click', () => {
+                cronInput.value = btn.dataset.cron;
+                updateDisplay();
+            });
+        });
+
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+
+</html>

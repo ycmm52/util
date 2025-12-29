@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Previewer | Tools</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext0: #a6adc8;
+            --ctp-subtext1: #bac2de;
+            --ctp-surface0: #313244;
+            --ctp-surface1: #45475a;
+            --ctp-surface2: #585b70;
+            --ctp-overlay0: #6c7086;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-sapphire: #74c7ec;
+            --ctp-sky: #89dceb;
+            --ctp-teal: #94e2d5;
+            --ctp-green: #a6e3a1;
+            --ctp-yellow: #f9e2af;
+            --ctp-peach: #fab387;
+            --ctp-mauve: #cba6f7;
+            --ctp-pink: #f5c2e7;
+            --ctp-red: #f38ba8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--ctp-base);
+            color: var(--ctp-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--ctp-mantle);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--ctp-surface0);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            color: var(--ctp-mauve);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-link {
+            color: var(--ctp-subtext0);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--ctp-sapphire);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            gap: 1px;
+            background: var(--ctp-surface0);
+        }
+
+        .pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--ctp-base);
+        }
+
+        .pane-header {
+            padding: 0.75rem 1rem;
+            background: var(--ctp-surface0);
+            color: var(--ctp-subtext0);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        #editor {
+            flex: 1;
+            background: var(--ctp-base);
+            color: var(--ctp-text);
+            border: none;
+            padding: 1rem;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            resize: none;
+            outline: none;
+        }
+
+        #preview {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            line-height: 1.7;
+        }
+
+        /* Markdown Styles */
+        #preview h1, #preview h2, #preview h3, #preview h4 {
+            color: var(--ctp-lavender);
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        #preview h1 { font-size: 1.75rem; border-bottom: 1px solid var(--ctp-surface0); padding-bottom: 0.5rem; }
+        #preview h2 { font-size: 1.4rem; }
+        #preview h3 { font-size: 1.2rem; }
+
+        #preview p { margin: 0.75rem 0; }
+
+        #preview a {
+            color: var(--ctp-sapphire);
+            text-decoration: none;
+        }
+
+        #preview a:hover {
+            text-decoration: underline;
+        }
+
+        #preview code {
+            background: var(--ctp-surface0);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 0.85em;
+            color: var(--ctp-peach);
+        }
+
+        #preview pre {
+            background: var(--ctp-mantle);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        #preview pre code {
+            background: none;
+            padding: 0;
+            color: var(--ctp-text);
+        }
+
+        #preview ul, #preview ol {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+
+        #preview li { margin: 0.25rem 0; }
+
+        #preview blockquote {
+            border-left: 3px solid var(--ctp-mauve);
+            margin: 1rem 0;
+            padding: 0.5rem 1rem;
+            background: var(--ctp-surface0);
+            border-radius: 0 8px 8px 0;
+        }
+
+        #preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        #preview th, #preview td {
+            border: 1px solid var(--ctp-surface1);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+
+        #preview th {
+            background: var(--ctp-surface0);
+            color: var(--ctp-lavender);
+        }
+
+        #preview hr {
+            border: none;
+            border-top: 1px solid var(--ctp-surface1);
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📝 Markdown Previewer</h1>
+        <a href="../" class="back-link">← Back to Tools</a>
+    </header>
+
+    <div class="container">
+        <div class="pane">
+            <div class="pane-header">Markdown</div>
+            <textarea id="editor" placeholder="Type your Markdown here...">
+# Welcome to Markdown Previewer
+
+This is a **live preview** Markdown editor.
+
+## Features
+
+- Real-time rendering
+- Syntax highlighting for `code`
+- Support for tables, lists, and more
+
+### Code Example
+
+```javascript
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+```
+
+> This is a blockquote
+
+| Feature | Status |
+|---------|--------|
+| Headers | ✅ |
+| Lists | ✅ |
+| Code | ✅ |
+
+---
+
+Made with ♥ using [marked.js](https://marked.js.org/)
+            </textarea>
+        </div>
+        <div class="pane">
+            <div class="pane-header">Preview</div>
+            <div id="preview"></div>
+        </div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
+
+        let debounceTimer;
+        function updatePreview() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                preview.innerHTML = marked.parse(editor.value);
+            }, 150);
+        }
+
+        editor.addEventListener('input', updatePreview);
+        
+        // Initial render
+        updatePreview();
+    </script>
+</body>
+</html>
